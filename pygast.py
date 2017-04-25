@@ -84,7 +84,7 @@ class Canvas(vispy.app.Canvas):
 	def on_resize(self, event):
 		(width, height) = event.physical_size
 		vispy.gloo.set_viewport(0, 0, width, height)
-		self.projection = vispy.util.transforms.perspective(45.0, width / height, 0.01, 1000.0)
+		self.projection = vispy.util.transforms.ortho(-1, 1, -1, 1, 0.01, 1000)
 
 	def on_draw(self, event):
 		vispy.gloo.clear()
