@@ -102,15 +102,14 @@ class Canvas(vispy.app.Canvas):
 
 	def on_key_release(self, event):
 		if event.key.name == 'Up':
-			for tree in self.trees:
-				tree.grow()
+			for t in self.trees:
+				t.grow()
 			self.update_program()
 
 		if event.key.name == 'Down':
-			for tree in self.trees:
-				tree.prune()
+			for t in self.trees:
+				t.prune()
 			self.update_program()
-
 
 def main():
 	c = Canvas()
