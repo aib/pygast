@@ -71,7 +71,7 @@ class sin:
 @tree.node('periodic')
 class sint:
 	def syntax(c):
-		return "sin(TAU * t * %s)" % (c(),)
+		return "sin(TAU * mod(t, %s))" % (c(),)
 
 
 @tree.node('interp')
