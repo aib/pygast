@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
+import tree
+import nodes
+
 import numpy as np
 import vispy.app
 
-vertex = """
+import time
+
+VERTEX = """
 uniform mat4 u_model;
 uniform mat4 u_view;
 uniform mat4 u_projection;
@@ -20,20 +25,33 @@ void main()
 }
 """
 
-fragment = """
+FRAGMENT = """
+#define TAU 6.283185307179586
+
+uniform float u_time;
+
 varying vec2 v_texcoord;
 
 void main()
 {
-	gl_FragColor = vec4(v_texcoord.st, 0, 1);
+	float x = v_texcoord.x;
+	float y = v_texcoord.y;
+	float t = u_time;
+
+	float t1 = %(tree1)s;
+	float t2 = %(tree2)s;
+	float t3 = %(tree3)s;
+
+	gl_FragColor = vec4(t1, t2, t3, 1);
 }
 """
 
 class Canvas(vispy.app.Canvas):
 	def __init__(self):
+		self.trees = [tree.Tree(), tree.Tree(), tree.Tree()]
+
 		vispy.app.Canvas.__init__(self, size=(800, 600))
 		vispy.gloo.set_state(clear_color='black')
-		self.program = vispy.gloo.Program(vertex, fragment)
 
 		self.view = vispy.util.transforms.translate((0, 0, -5))
 		self.model = np.eye(4, dtype=np.float32)
@@ -45,8 +63,23 @@ class Canvas(vispy.app.Canvas):
 			([+1, -1, 0], [1, 0])
 		], dtype=[('a_position', np.float32, 3), ('a_texcoord', np.float32, 2)])
 
+		self.update_program()
+
 		self.on_resize(vispy.app.canvas.ResizeEvent('resize', self.size))
 		self.show()
+
+		self.start_time = time.monotonic()
+
+	def update_program(self):
+		vertex = VERTEX
+		fragment = FRAGMENT % {
+			'tree1': self.trees[0].syntax(),
+			'tree2': self.trees[1].syntax(),
+			'tree3': self.trees[2].syntax()
+		}
+		self.program = vispy.gloo.Program(vertex, fragment)
+		for tree in self.trees:
+			print(tree.syntax())
 
 	def on_resize(self, event):
 		(width, height) = event.physical_size
@@ -59,11 +92,18 @@ class Canvas(vispy.app.Canvas):
 		self.program['u_model'] = self.model
 		self.program['u_view'] = self.view
 		self.program['u_projection'] = self.projection
+		self.program['u_time'] = time.monotonic() - self.start_time
 
 		self.program.bind(vispy.gloo.VertexBuffer(self.quad))
 		self.program.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
 
 		self.update()
+
+	def on_key_release(self, event):
+		if event.key.name == ' ':
+			for tree in self.trees:
+				tree.grow()
+			self.update_program()
 
 def main():
 	c = Canvas()
