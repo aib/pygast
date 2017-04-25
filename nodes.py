@@ -50,6 +50,11 @@ class add:
 	def syntax(c):
 		return "%s + %s" % (c(), c())
 
+@tree.node('arithmetic')
+class mod:
+	def syntax(c):
+		return "mod(%s, %s)" % (c(), c())
+
 
 @tree.node('inversion')
 class neg:
