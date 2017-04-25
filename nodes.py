@@ -78,3 +78,14 @@ class sint:
 class lerp:
 	def syntax(c):
 		return "%(a)s*%(t)s + (%(b)s*(1-%(t)s))" % { 'a': c(), 'b': c(), 't': c() }
+
+
+@tree.node('destructive')
+class sign:
+	def syntax(c):
+		return "sign(%s)" % (c(),)
+
+@tree.node('destructive')
+class fract:
+	def syntax(c):
+		return "fract(%s)" % (c(),)
