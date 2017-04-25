@@ -12,6 +12,17 @@ class const:
 	def syntax(d):
 		return "%g" % (d.val,)
 
+@tree.node('constants')
+class bigconst:
+	def init(d):
+		n = random.randint(1, 1000)
+		if random.random() < 0.5:
+			d.val = n
+		else:
+			d.val = 1 / n
+	def syntax(d):
+		return "%g" % (d.val,)
+
 
 @tree.node('variables')
 class x:
@@ -55,3 +66,15 @@ class reciprocal:
 class sin:
 	def syntax(c):
 		return "sin(TAU * %s)" % (c(),)
+
+
+@tree.node('periodic')
+class sint:
+	def syntax(c):
+		return "sin(TAU * t * %s)" % (c(),)
+
+
+@tree.node('interp')
+class lerp:
+	def syntax(c):
+		return "%(a)s*%(t)s + (%(b)s*(1-%(t)s))" % { 'a': c(), 'b': c(), 't': c() }
