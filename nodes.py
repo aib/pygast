@@ -21,7 +21,7 @@ class bigconst:
 		else:
 			d.val = 1 / n
 	def syntax(d):
-		return "%g" % (d.val,)
+		return "float(%g)" % (d.val,)
 
 
 @tree.node('variables')
