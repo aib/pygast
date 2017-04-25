@@ -67,6 +67,21 @@ class Tree:
 		else:
 			self.root = new_node
 
+	def prune(self):
+		nonleaf_nodes = list(filter(lambda n: n.count_children() > 0, self.nodes()))
+		if len(nonleaf_nodes) == 0:
+			return
+
+		node = random.choice(nonleaf_nodes)
+		child = random.choice(node.children)
+
+		child.parent = node.parent
+
+		if node.parent is not None:
+			node.parent.replace_child(node, child)
+		else:
+			self.root = child
+
 class Node:
 	class Data(object):
 		pass
