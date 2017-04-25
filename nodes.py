@@ -12,17 +12,6 @@ class const:
 	def syntax(d):
 		return "%g" % (d.val,)
 
-@tree.node('constants')
-class bigconst:
-	def init(d):
-		n = random.randint(1, 1000)
-		if random.random() < 0.5:
-			d.val = n
-		else:
-			d.val = 1 / n
-	def syntax(d):
-		return "float(%g)" % (d.val,)
-
 
 @tree.node('variables')
 class x:
