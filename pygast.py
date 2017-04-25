@@ -4,8 +4,11 @@ import tree
 import nodes
 
 import numpy as np
+import pyaudio
 import vispy.app
 
+import array
+import random
 import time
 
 VERTEX = """
@@ -133,8 +136,18 @@ class Canvas(vispy.app.Canvas):
 				t.prune()
 			self.update_program()
 
+	def on_audio_stream(self, in_data, frame_count, time_info, status):
+		data = list(map(lambda n: random.random(), range(frame_count)))
+		adata = array.array('H', map(lambda x: int(65535 * x), data))
+		return (adata.tobytes(), pyaudio.paContinue)
+
 def main():
 	c = Canvas()
+	pa = pyaudio.PyAudio()
+
+	stream = pa.open(format=pa.get_format_from_width(2, False), channels=1, rate=44100, output=True, stream_callback=c.on_audio_stream)
+
+	stream.start_stream()
 	vispy.app.run()
 
 if __name__ == '__main__':
