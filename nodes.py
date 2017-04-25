@@ -82,7 +82,7 @@ class sint:
 @tree.node('interp')
 class lerp:
 	def syntax(c):
-		return "%(a)s*%(t)s + (%(b)s*(1-%(t)s))" % { 'a': c(), 'b': c(), 't': c() }
+		return "mix(%s, %s, %s)" % (c(), c(), c())
 
 
 @tree.node('destructive')
