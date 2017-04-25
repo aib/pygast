@@ -78,6 +78,7 @@ class Canvas(vispy.app.Canvas):
 			'tree3': self.trees[2].syntax()
 		}
 		self.program = vispy.gloo.Program(vertex, fragment)
+		print("--")
 		for tree in self.trees:
 			print(tree.syntax())
 
@@ -100,10 +101,16 @@ class Canvas(vispy.app.Canvas):
 		self.update()
 
 	def on_key_release(self, event):
-		if event.key.name == ' ':
+		if event.key.name == 'Up':
 			for tree in self.trees:
 				tree.grow()
 			self.update_program()
+
+		if event.key.name == 'Down':
+			for tree in self.trees:
+				tree.prune()
+			self.update_program()
+
 
 def main():
 	c = Canvas()
