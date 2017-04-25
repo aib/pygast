@@ -40,6 +40,17 @@ class add:
 		return "%s + %s" % (c(), c())
 
 
+@tree.node('inversion')
+class neg:
+	def syntax(c):
+		return "-%s" % (c(),)
+
+@tree.node('inversion')
+class reciprocal:
+	def syntax(c):
+		return "1 / %s" % (c(),)
+
+
 @tree.node('trigonometry')
 class sin:
 	def syntax(c):
