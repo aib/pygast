@@ -101,6 +101,28 @@ class Canvas(vispy.app.Canvas):
 		self.update()
 
 	def on_key_release(self, event):
+		def new_trees(size):
+			self.trees = [tree.Tree(), tree.Tree(), tree.Tree()]
+			for i in range(size):
+				for t in self.trees:
+					t.grow()
+			self.update_program()
+
+		if event.key.name == ' ':
+			new_trees(0)
+
+		if event.key.name == '1':
+			new_trees(3)
+
+		if event.key.name == '2':
+			new_trees(5)
+
+		if event.key.name == '3':
+			new_trees(10)
+
+		if event.key.name == '4':
+			new_trees(20)
+
 		if event.key.name == 'Up':
 			for t in self.trees:
 				t.grow()
