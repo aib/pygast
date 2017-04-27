@@ -33,7 +33,7 @@ uniform float u_time;
 varying vec2 v_texcoord;
 
 vec3 hsl2rgb(vec3 hsl) {
-	hsl.z = abs(mod(1 - hsl.z, 2) - 1);
+	hsl.z = abs(mod(0.5 - hsl.z, 2) - 1);
 	hsl.y = abs(mod(hsl.y - 1, 4) - 2) - 1;
 
 	float Hp = hsl.x * 6;
@@ -75,7 +75,7 @@ void main()
 	t2 = xx;
 	t3 = yy;
 */
-	gl_FragColor = vec4(hsl2rgb(vec3(fract(t1), t2, t3 + 0.5)), 1);
+	gl_FragColor = vec4(hsl2rgb(vec3(t1, t2, t3)), 1);
 }
 """
 
