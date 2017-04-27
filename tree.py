@@ -31,6 +31,9 @@ class Counter:
 	def increment(self):
 		self.count += 1
 
+class Data(object):
+	pass
+
 class Tree:
 	def __init__(self, picker=None):
 		self.picker = picker
@@ -83,8 +86,6 @@ class Tree:
 			self.root = child
 
 class Node:
-	class Data(object):
-		pass
 	class Counter:
 		def __init__(self):
 			self.count = 0
@@ -93,7 +94,7 @@ class Node:
 
 	def __init__(self, node_type):
 		self.type = node_type
-		self.data = self.Data()
+		self.data = Data()
 		if hasattr(node_type, 'init'):
 			node_type.init(self.data)
 		self.parent = None
