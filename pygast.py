@@ -80,7 +80,7 @@ class Canvas(vispy.app.Canvas):
 	def __init__(self):
 		self.trees = [tree.Tree(), tree.Tree(), tree.Tree()]
 
-		vispy.app.Canvas.__init__(self, size=(800, 600), keys='interactive')
+		vispy.app.Canvas.__init__(self, size=(1024, 768), keys='interactive')
 		vispy.gloo.set_state(clear_color='black')
 
 		self.view = vispy.util.transforms.translate((0, 0, -5))
