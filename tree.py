@@ -1,4 +1,5 @@
 import inspect
+import math
 import random
 import types
 
@@ -43,7 +44,10 @@ class Tree:
 		return self.root.syntax()
 
 	def eval(self, eval_data):
-		return self.root.eval(eval_data)
+		try:
+			return self.root.eval(eval_data)
+		except ZeroDivisionError:
+			return math.nan
 
 	def nodes(self):
 		def get_nodes(node):
