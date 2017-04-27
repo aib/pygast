@@ -42,6 +42,9 @@ class Tree:
 	def syntax(self):
 		return self.root.syntax()
 
+	def dot(self):
+		return 'graph {\n%s}\n' % (self.root.dot(),)
+
 	def nodes(self):
 		def get_nodes(node):
 			nodes = [node]
@@ -118,6 +121,19 @@ class Node:
 	def syntax(self):
 		cgen = iter(self.children)
 		return self._call_syntax(lambda: '(' + next(cgen).syntax() + ')')
+
+	def dot(self):
+		s = '%s [label="%s"]\n' % (id(self), self.label())
+		for c in self.children:
+			if c is not None:
+				s += c.dot()
+		for c in self.children:
+			if c is not None:
+				s += '%s -- %s\n' % (id(self), id(c))
+		return s
+
+	def label(self):
+		return self._call_syntax(lambda: "·")
 
 	def __repr__(self):
 		return "Node(%s)" % (self.type,)
