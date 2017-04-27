@@ -101,10 +101,10 @@ class Node:
 
 	def count_children(self):
 		c = self.Counter()
-		self.call_syntax(c.increment)
+		self._call_syntax(c.increment)
 		return c.count
 
-	def call_syntax(self, print_func):
+	def _call_syntax(self, print_func):
 		replace = lambda l, o, n: list(map(lambda e: n if e == o else e, l))
 		args = inspect.getfullargspec(self.type.syntax).args
 		args = replace(args, 'c', print_func)
@@ -116,7 +116,7 @@ class Node:
 
 	def syntax(self):
 		cgen = iter(self.children)
-		return self.call_syntax(lambda: '(' + next(cgen).syntax() + ')')
+		return self._call_syntax(lambda: '(' + next(cgen).syntax() + ')')
 
 	def __repr__(self):
 		return "Node(%s)" % (self.type,)
