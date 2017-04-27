@@ -56,7 +56,8 @@ class mod:
 	def syntax(c):
 		return "mod(%s, %s)" % (c(), c())
 	def eval(c):
-		return c() % c()
+		(a, b) = (c(), c())
+		return a % b
 
 
 @tree.node('inversion')
