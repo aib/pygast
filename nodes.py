@@ -88,4 +88,4 @@ class lerp:
 		return "mix(%s, %s, %s)" % (c(), c(), c())
 	def eval(c):
 		(a, b, t) = (c(), c(), c())
-		return a*t + b*(1-t)
+		return a*(1-t) + b*t
