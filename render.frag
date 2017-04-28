@@ -40,6 +40,7 @@ void main()
 	float t1 = %(tree1)s;
 	float t2 = %(tree2)s;
 	float t3 = %(tree3)s;
+	float t4 = %(tree4)s;
 /*
 	float xx = (8 * x) - 4;
 	float yy = (8 * y) - 4;
@@ -47,5 +48,5 @@ void main()
 	t2 = xx;
 	t3 = yy;
 */
-	gl_FragColor = vec4(hsl2rgb(vec3(t1, t2, t3)), 1);
+	gl_FragColor = vec4(hsl2rgb(vec3(t1, t2, t3)), t4);
 }
