@@ -4,6 +4,7 @@ import tree
 import nodes
 
 import numpy as np
+import scipy.misc
 import vispy.app
 
 import time
@@ -27,6 +28,8 @@ class Canvas(vispy.app.Canvas):
 			([+1, +1, 0], [1, 1]),
 			([+1, -1, 0], [1, 0])
 		], dtype=[('a_position', np.float32, 3), ('a_texcoord', np.float32, 2)])
+
+		self.save = False
 
 		self.update_program()
 
@@ -69,6 +72,13 @@ class Canvas(vispy.app.Canvas):
 			self.render_to_texture.bind(vispy.gloo.VertexBuffer(self.quad))
 			self.render_to_texture.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
 
+		pix = self.fbo.read('color', True)
+
+		if self.save:
+			rgb = pix[:,:,0:3]
+			scipy.misc.imsave('ss.png', rgb)
+			self.save = False
+
 		vispy.gloo.clear()
 		self.render_from_texture['u_model'] = self.model
 		self.render_from_texture['u_view'] = self.view
@@ -101,6 +111,9 @@ class Canvas(vispy.app.Canvas):
 
 		if event.key.name == '4':
 			new_trees(20)
+
+		if event.key.name == 'S':
+			self.save = True
 
 		if event.key.name == 'Up':
 			for t in self.trees:
