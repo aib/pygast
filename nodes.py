@@ -62,24 +62,7 @@ class sin:
 		return "sin(TAU * %s)" % (c(),)
 
 
-@tree.node('periodic')
-class sint:
-	def syntax(c):
-		return "sin(TAU * mod(t, %s))" % (c(),)
-
-
 @tree.node('interp')
 class lerp:
 	def syntax(c):
 		return "mix(%s, %s, %s)" % (c(), c(), c())
-
-
-@tree.node('destructive')
-class sign:
-	def syntax(c):
-		return "sign(%s)" % (c(),)
-
-@tree.node('destructive')
-class fract:
-	def syntax(c):
-		return "fract(%s)" % (c(),)

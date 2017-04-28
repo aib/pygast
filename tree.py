@@ -31,6 +31,9 @@ class Counter:
 	def increment(self):
 		self.count += 1
 
+class Data(object):
+	pass
+
 class Tree:
 	def __init__(self, picker=None):
 		self.picker = picker
@@ -38,6 +41,9 @@ class Tree:
 
 	def syntax(self):
 		return self.root.syntax()
+
+	def dot(self):
+		return 'graph {\n%s}\n' % (self.root.dot(),)
 
 	def nodes(self):
 		def get_nodes(node):
@@ -83,8 +89,6 @@ class Tree:
 			self.root = child
 
 class Node:
-	class Data(object):
-		pass
 	class Counter:
 		def __init__(self):
 			self.count = 0
@@ -93,7 +97,7 @@ class Node:
 
 	def __init__(self, node_type):
 		self.type = node_type
-		self.data = self.Data()
+		self.data = Data()
 		if hasattr(node_type, 'init'):
 			node_type.init(self.data)
 		self.parent = None
@@ -101,10 +105,10 @@ class Node:
 
 	def count_children(self):
 		c = self.Counter()
-		self.call_syntax(c.increment)
+		self._call_syntax(c.increment)
 		return c.count
 
-	def call_syntax(self, print_func):
+	def _call_syntax(self, print_func):
 		replace = lambda l, o, n: list(map(lambda e: n if e == o else e, l))
 		args = inspect.getfullargspec(self.type.syntax).args
 		args = replace(args, 'c', print_func)
@@ -116,7 +120,20 @@ class Node:
 
 	def syntax(self):
 		cgen = iter(self.children)
-		return self.call_syntax(lambda: '(' + next(cgen).syntax() + ')')
+		return self._call_syntax(lambda: '(' + next(cgen).syntax() + ')')
+
+	def dot(self):
+		s = '%s [label="%s"]\n' % (id(self), self.label())
+		for c in self.children:
+			if c is not None:
+				s += c.dot()
+		for c in self.children:
+			if c is not None:
+				s += '%s -- %s\n' % (id(self), id(c))
+		return s
+
+	def label(self):
+		return self._call_syntax(lambda: "·")
 
 	def __repr__(self):
 		return "Node(%s)" % (self.type,)
