@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import helper
 import tree
 import nodes
 
@@ -9,6 +10,8 @@ import scipy.misc
 import vispy.app
 
 import array
+import itertools
+import math
 import random
 import time
 
@@ -93,6 +96,22 @@ class Canvas(vispy.app.Canvas):
 
 		self.update()
 
+	def on_audio_stream(self, in_data, frame_count, time_info, status):
+		while self.fbopix is None:
+			time.sleep(0.0001)
+
+		pix = self.fbopix[:,:,3]
+
+		xys = itertools.islice(helper.spacefill2d1q(), frame_count)
+
+		curve_width = math.ceil(math.sqrt(frame_count))
+		curve_xscale = math.floor(pix.shape[1] / curve_width)
+		curve_yscale = math.floor(pix.shape[0] / curve_width)
+
+		data = np.array(list(map(lambda xy: pix[xy[1] * curve_yscale][xy[0] * curve_xscale], xys)))
+
+		return (array.array('H', data * 256).tobytes(), pyaudio.paContinue)
+
 	def on_key_release(self, event):
 		def new_trees(size):
 			self._init_trees()
@@ -128,11 +147,6 @@ class Canvas(vispy.app.Canvas):
 			for t in self.trees:
 				t.prune()
 			self.update_program()
-
-	def on_audio_stream(self, in_data, frame_count, time_info, status):
-		data = list(map(lambda n: random.random(), range(frame_count)))
-		adata = array.array('H', map(lambda x: int(65535 * x), data))
-		return (adata.tobytes(), pyaudio.paContinue)
 
 	def _init_trees(self):
 		self.trees = [tree.Tree(), tree.Tree(), tree.Tree(), tree.Tree()]
