@@ -11,7 +11,7 @@ import time
 
 class Canvas(vispy.app.Canvas):
 	def __init__(self):
-		self.trees = [tree.Tree(), tree.Tree(), tree.Tree()]
+		self._init_trees()
 
 		vispy.app.Canvas.__init__(self, size=(1024, 768), keys='interactive')
 		vispy.gloo.set_state(clear_color='black')
@@ -45,7 +45,8 @@ class Canvas(vispy.app.Canvas):
 			fragment = f.read() % {
 				'tree1': self.trees[0].syntax(),
 				'tree2': self.trees[1].syntax(),
-				'tree3': self.trees[2].syntax()
+				'tree3': self.trees[2].syntax(),
+				'tree4': self.trees[3].syntax()
 			}
 		self.render_to_texture = vispy.gloo.Program(vertex, fragment)
 
@@ -74,7 +75,6 @@ class Canvas(vispy.app.Canvas):
 			self.render_to_texture.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
 			pix = self.fbo.read('color')
 
-
 		if self.save:
 			self._do_save(pix, frame_time)
 			self.save = False
@@ -91,7 +91,7 @@ class Canvas(vispy.app.Canvas):
 
 	def on_key_release(self, event):
 		def new_trees(size):
-			self.trees = [tree.Tree(), tree.Tree(), tree.Tree()]
+			self._init_trees()
 			for i in range(size):
 				for t in self.trees:
 					t.grow()
@@ -125,6 +125,9 @@ class Canvas(vispy.app.Canvas):
 				t.prune()
 			self.update_program()
 
+
+	def _init_trees(self):
+		self.trees = [tree.Tree(), tree.Tree(), tree.Tree(), tree.Tree()]
 
 	def _do_save(self, pix, frame_time):
 		fn = "pygast_%s_t%.3f.png" % (time.strftime("%Y%m%d_%H%M%S"), frame_time)
