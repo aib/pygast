@@ -66,9 +66,10 @@ class Canvas(vispy.app.Canvas):
 		self.fbotex.resize((height, width, 4))
 
 	def on_draw(self, event):
+		frame_time = time.monotonic() - self.start_time
 		with self.fbo:
 			vispy.gloo.clear()
-			self.render_to_texture['u_time'] = time.monotonic() - self.start_time
+			self.render_to_texture['u_time'] = frame_time
 			self.render_to_texture.bind(vispy.gloo.VertexBuffer(self.quad))
 			self.render_to_texture.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
 
