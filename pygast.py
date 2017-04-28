@@ -72,8 +72,8 @@ class Canvas(vispy.app.Canvas):
 			self.render_to_texture['u_time'] = frame_time
 			self.render_to_texture.bind(vispy.gloo.VertexBuffer(self.quad))
 			self.render_to_texture.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
+			pix = self.fbo.read('color')
 
-		pix = self.fbo.read('color', True)
 
 		if self.save:
 			self._do_save(pix, frame_time)
