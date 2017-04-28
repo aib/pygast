@@ -133,13 +133,13 @@ class Canvas(vispy.app.Canvas):
 		adata = array.array('H', map(lambda x: int(65535 * x), data))
 		return (adata.tobytes(), pyaudio.paContinue)
 
-
 	def _init_trees(self):
 		self.trees = [tree.Tree(), tree.Tree(), tree.Tree(), tree.Tree()]
 
 	def _do_save(self, pix, frame_time):
 		fn = "pygast_%s_t%.3f.png" % (time.strftime("%Y%m%d_%H%M%S"), frame_time)
 		scipy.misc.imsave(fn, pix[:,:,0:3])
+
 def main():
 	c = Canvas()
 	pa = pyaudio.PyAudio()
