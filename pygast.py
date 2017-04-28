@@ -131,8 +131,7 @@ class Canvas(vispy.app.Canvas):
 
 	def _do_save(self, pix, frame_time):
 		fn = "pygast_%s_t%.3f.png" % (time.strftime("%Y%m%d_%H%M%S"), frame_time)
-		rgb = pix[:,:,0:3]
-		scipy.misc.imsave(fn, rgb)
+		scipy.misc.imsave(fn, pix[:,:,0:3])
 def main():
 	c = Canvas()
 	vispy.app.run()
