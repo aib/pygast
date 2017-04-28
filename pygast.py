@@ -76,8 +76,7 @@ class Canvas(vispy.app.Canvas):
 		pix = self.fbo.read('color', True)
 
 		if self.save:
-			rgb = pix[:,:,0:3]
-			scipy.misc.imsave('ss.png', rgb)
+			self._do_save(pix, frame_time)
 			self.save = False
 
 		vispy.gloo.clear()
@@ -126,6 +125,11 @@ class Canvas(vispy.app.Canvas):
 				t.prune()
 			self.update_program()
 
+
+	def _do_save(self, pix, frame_time):
+		fn = "pygast_%s_t%.3f.png" % (time.strftime("%Y%m%d_%H%M%S"), frame_time)
+		rgb = pix[:,:,0:3]
+		scipy.misc.imsave(fn, rgb)
 def main():
 	c = Canvas()
 	vispy.app.run()
