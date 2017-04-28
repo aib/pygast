@@ -21,6 +21,7 @@ class Canvas(vispy.app.Canvas):
 
 		self.fbotex = vispy.gloo.Texture2D((self.size[1], self.size[0], 4), 'rgba')
 		self.fbo = vispy.gloo.FrameBuffer(self.fbotex)
+		self.fbopix = None
 
 		self.view = vispy.util.transforms.translate((0, 0, -5))
 		self.model = np.eye(4, dtype=np.float32)
@@ -76,10 +77,10 @@ class Canvas(vispy.app.Canvas):
 			self.render_to_texture['u_time'] = frame_time
 			self.render_to_texture.bind(vispy.gloo.VertexBuffer(self.quad))
 			self.render_to_texture.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
-			pix = self.fbo.read('color')
+			self.fbopix = self.fbo.read('color')
 
 		if self.save:
-			self._do_save(pix, frame_time)
+			self._do_save(self.fbopix, frame_time)
 			self.save = False
 
 		vispy.gloo.clear()
