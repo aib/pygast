@@ -15,6 +15,9 @@ class Canvas(vispy.app.Canvas):
 		vispy.app.Canvas.__init__(self, size=(1024, 768), keys='interactive')
 		vispy.gloo.set_state(clear_color='black')
 
+		self.fbotex = vispy.gloo.Texture2D((self.size[1], self.size[0], 4), 'rgba')
+		self.fbo = vispy.gloo.FrameBuffer(self.fbotex)
+
 		self.view = vispy.util.transforms.translate((0, 0, -5))
 		self.model = np.eye(4, dtype=np.float32)
 
@@ -33,17 +36,21 @@ class Canvas(vispy.app.Canvas):
 		self.start_time = time.monotonic()
 
 	def update_program(self):
-		with open('render.vert', 'r') as f:
+		with open('passthrough.vert', 'r') as f:
 			vertex = f.read()
-
 		with open('render.frag', 'r') as f:
 			fragment = f.read() % {
 				'tree1': self.trees[0].syntax(),
 				'tree2': self.trees[1].syntax(),
 				'tree3': self.trees[2].syntax()
 			}
+		self.render_to_texture = vispy.gloo.Program(vertex, fragment)
 
-		self.program = vispy.gloo.Program(vertex, fragment)
+		with open('render.vert', 'r') as f:
+			vertex = f.read()
+		with open('fromtex.frag', 'r') as f:
+			fragment = f.read()
+		self.render_from_texture = vispy.gloo.Program(vertex, fragment)
 
 		print("--")
 		for tree in self.trees:
@@ -53,17 +60,22 @@ class Canvas(vispy.app.Canvas):
 		(width, height) = event.physical_size
 		vispy.gloo.set_viewport(0, 0, width, height)
 		self.projection = vispy.util.transforms.ortho(-1, 1, -1, 1, 0.01, 1000)
+		self.fbotex.resize((height, width, 4))
 
 	def on_draw(self, event):
+		with self.fbo:
+			vispy.gloo.clear()
+			self.render_to_texture['u_time'] = time.monotonic() - self.start_time
+			self.render_to_texture.bind(vispy.gloo.VertexBuffer(self.quad))
+			self.render_to_texture.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
+
 		vispy.gloo.clear()
-
-		self.program['u_model'] = self.model
-		self.program['u_view'] = self.view
-		self.program['u_projection'] = self.projection
-		self.program['u_time'] = time.monotonic() - self.start_time
-
-		self.program.bind(vispy.gloo.VertexBuffer(self.quad))
-		self.program.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
+		self.render_from_texture['u_model'] = self.model
+		self.render_from_texture['u_view'] = self.view
+		self.render_from_texture['u_projection'] = self.projection
+		self.render_from_texture['u_texture'] = self.fbotex
+		self.render_from_texture.bind(vispy.gloo.VertexBuffer(self.quad))
+		self.render_from_texture.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
 
 		self.update()
 
