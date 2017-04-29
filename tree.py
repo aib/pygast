@@ -45,6 +45,9 @@ class Tree:
 	def dot(self):
 		return 'graph {\n%s}\n' % (self.root.dot(),)
 
+	def eval(self, eval_data):
+		return self.root.eval(eval_data)
+
 	def nodes(self):
 		def get_nodes(node):
 			nodes = [node]
@@ -115,6 +118,14 @@ class Node:
 		args = replace(args, 'd', self.data)
 		return self.type.syntax(*args)
 
+	def _call_eval(self, child_func, eval_data):
+		replace = lambda l, o, n: list(map(lambda e: n if e == o else e, l))
+		args = inspect.getfullargspec(self.type.eval).args
+		args = replace(args, 'c', child_func)
+		args = replace(args, 'd', self.data)
+		args = replace(args, 'e', eval_data)
+		return self.type.eval(*args)
+
 	def replace_child(self, old_child, new_child):
 		self.children = list(map(lambda c: new_child if c == old_child else c, self.children))
 
@@ -135,6 +146,10 @@ class Node:
 	def label(self):
 		return self._call_syntax(lambda: "·")
 
+	def eval(self, eval_data):
+		cgen = iter(self.children)
+		return self._call_eval(lambda: next(cgen).eval(eval_data), eval_data)
+
 	def __repr__(self):
 		return "Node(%s)" % (self.type,)
 
@@ -154,6 +169,7 @@ def node(group=''):
 		if hasattr(cls, 'init'):
 			node_type.init = cls.init
 		node_type.syntax = cls.syntax
+		node_type.eval = cls.eval
 
 		all_nodes.append(node_type)
 		if group not in all_nodes_by_group:
