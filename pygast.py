@@ -16,6 +16,10 @@ import random
 import time
 
 class Canvas(vispy.app.Canvas):
+	AUDIO_SAMPLE_RATE = 44100
+	AUDIO_BUFFER_SIZE = AUDIO_SAMPLE_RATE // 20
+	AUDIO_GENERATE_SIZE = AUDIO_BUFFER_SIZE // 2
+
 	def __init__(self):
 		self._init_trees()
 
@@ -28,7 +32,7 @@ class Canvas(vispy.app.Canvas):
 		self.fbo = vispy.gloo.FrameBuffer(self.fbotex)
 		self.fbopix = None
 
-		self.audio_buffer = helper.FIFO(2205, dtype='uint8')
+		self.audio_buffer = helper.FIFO(self.AUDIO_BUFFER_SIZE, dtype='uint8')
 		self.audio_buffer_position = 0
 		self.audio_indices = list(itertools.islice(helper.spacefill2d1q(), self.audio_buffer.size//2))
 		self.audio_indices = self.audio_indices + list(reversed(self.audio_indices))
@@ -48,7 +52,7 @@ class Canvas(vispy.app.Canvas):
 
 		self.update_program()
 
-		self.audio_stream = self.pa.open(format=pyaudio.paUInt8, channels=1, rate=44100, output=True, stream_callback=self.on_audio_stream)
+		self.audio_stream = self.pa.open(format=pyaudio.paUInt8, channels=1, rate=self.AUDIO_SAMPLE_RATE, output=True, stream_callback=self.on_audio_stream)
 		self.audio_stream.start_stream()
 
 		self.on_resize(vispy.app.canvas.ResizeEvent('resize', self.size))
@@ -93,16 +97,15 @@ class Canvas(vispy.app.Canvas):
 			self.render_to_texture.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
 			self.fbopix = self.fbo.read('color')
 
-		N = 100
-		while self.audio_buffer.can_put(N):
-			t = (self.audio_buffer_position + np.array(range(N))) / 44100
+		while self.audio_buffer.can_put(self.AUDIO_GENERATE_SIZE):
+			t = (self.audio_buffer_position + np.array(range(self.AUDIO_GENERATE_SIZE))) / self.AUDIO_SAMPLE_RATE
 			e = tree.Data()
 			e.x = e.y = e.t = t
 			ev = self.trees[3].eval(e)
 			if not isinstance(ev, np.ndarray): #scalar
-				ev = np.repeat(ev, N)
+				ev = np.repeat(ev, self.AUDIO_GENERATE_SIZE)
 
-			self.audio_buffer_position += N
+			self.audio_buffer_position += self.AUDIO_GENERATE_SIZE
 			tput = (np.mod(ev, 1.0) * 255).astype('uint8')
 			self.audio_buffer.put(tput)
 
