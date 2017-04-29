@@ -41,6 +41,7 @@ class Canvas(vispy.app.Canvas):
 			([+1, -1, 0], [1, 0])
 		], dtype=[('a_position', np.float32, 3), ('a_texcoord', np.float32, 2)])
 
+		self.mute = True
 		self.save = False
 
 		self.update_program()
@@ -115,7 +116,10 @@ class Canvas(vispy.app.Canvas):
 		while not self.audio_buffer.can_get(frame_count):
 			time.sleep(0.0001)
 
-		return (self.audio_buffer.get(frame_count).tobytes(), pyaudio.paContinue)
+		if self.mute:
+			return (np.zeros(frame_count, 'float32').tobytes(), pyaudio.paContinue)
+		else:
+			return (self.audio_buffer.get(frame_count).tobytes(), pyaudio.paContinue)
 
 	def on_key_release(self, event):
 		def new_trees(size):
@@ -139,6 +143,9 @@ class Canvas(vispy.app.Canvas):
 
 		if event.key.name == '4':
 			new_trees(20)
+
+		if event.key.name == 'M':
+			self.mute = not self.mute
 
 		if event.key.name == 'S':
 			self.save = True
