@@ -1,4 +1,7 @@
 import itertools
+import threading
+
+import numpy as np
 
 class spacefill2d1q:
 	RIGHT = (lambda x: x+1, lambda y: y)
@@ -47,3 +50,30 @@ class spacefill2d1q:
 
 	def _move(self, mdir):
 		self.x, self.y = mdir[0](self.x), mdir[1](self.y)
+
+class FIFO:
+	def __init__(self, size, dtype=None):
+		self.lock = threading.Lock()
+		self.data = np.empty(0, dtype)
+		self.max_size = size
+		self.count = 0
+
+	def can_put(self, put_length):
+		return self.count + put_length <= self.max_size
+
+	def put(self, put_data):
+		with self.lock:
+			assert(self.can_put(len(put_data)))
+			self.data = np.append(self.data, put_data)
+			self.count += len(put_data)
+
+	def can_get(self, get_length):
+		return self.count >= get_length
+
+	def get(self, get_length):
+		with self.lock:
+			assert(self.can_get(get_length))
+			get_data = self.data[0:get_length]
+			self.data = self.data[get_length:]
+			self.count -= get_length
+			return get_data
