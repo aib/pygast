@@ -88,7 +88,9 @@ class Canvas(vispy.app.Canvas):
 			self.fbopix = self.fbo.read('color')
 
 		apix = self.fbopix[:,:,3]
-		ipix = np.array(list(map(lambda xy: apix[apix.shape[0]-1-xy[1]][xy[0]], self.audio_indices)))
+		xscale = math.floor(apix.shape[1] / max(map(lambda xy: xy[0], self.audio_indices)))
+		yscale = math.floor(apix.shape[0] / max(map(lambda xy: xy[1], self.audio_indices)))
+		ipix = np.array(list(map(lambda xy: apix[apix.shape[0]-1-(xy[1]*yscale)][xy[0]*xscale], self.audio_indices)))
 		N = 100
 		np.set_printoptions(threshold=np.nan)
 		while self.audio_buffer.can_put(N):
