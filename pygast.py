@@ -155,6 +155,12 @@ class Canvas(vispy.app.Canvas):
 		if event.key.name == '4':
 			new_trees(20)
 
+		if event.key.name == '5':
+			new_trees(50)
+
+		if event.key.name == '6':
+			new_trees(100)
+
 		if event.key.name == 'M':
 			self.mute = not self.mute
 
