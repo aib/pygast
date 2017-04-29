@@ -43,6 +43,9 @@ class Tree:
 	def syntax(self):
 		return self.root.syntax()
 
+	def dot(self):
+		return 'graph {\n%s}\n' % (self.root.dot(),)
+
 	def eval(self, eval_data):
 		try:
 			return self.root.eval(eval_data)
@@ -133,6 +136,19 @@ class Node:
 	def syntax(self):
 		cgen = iter(self.children)
 		return self._call_syntax(lambda: '(' + next(cgen).syntax() + ')')
+
+	def dot(self):
+		s = '%s [label="%s"]\n' % (id(self), self.label())
+		for c in self.children:
+			if c is not None:
+				s += c.dot()
+		for c in self.children:
+			if c is not None:
+				s += '%s -- %s\n' % (id(self), id(c))
+		return s
+
+	def label(self):
+		return self._call_syntax(lambda: "·")
 
 	def eval(self, eval_data):
 		cgen = iter(self.children)
