@@ -1,5 +1,4 @@
 import inspect
-import math
 import random
 import types
 
@@ -47,10 +46,7 @@ class Tree:
 		return 'graph {\n%s}\n' % (self.root.dot(),)
 
 	def eval(self, eval_data):
-		try:
-			return self.root.eval(eval_data)
-		except ZeroDivisionError:
-			return math.nan
+		return self.root.eval(eval_data)
 
 	def nodes(self):
 		def get_nodes(node):
