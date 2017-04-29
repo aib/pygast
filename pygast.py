@@ -17,7 +17,7 @@ import time
 
 class Canvas(vispy.app.Canvas):
 	AUDIO_SAMPLE_RATE = 44100
-	AUDIO_BUFFER_SIZE = AUDIO_SAMPLE_RATE // 20
+	AUDIO_BUFFER_SIZE = AUDIO_SAMPLE_RATE // 10
 	AUDIO_GENERATE_SIZE = AUDIO_BUFFER_SIZE // 2
 
 	def __init__(self):
