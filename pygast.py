@@ -26,8 +26,10 @@ class Canvas(vispy.app.Canvas):
 		self.fbo = vispy.gloo.FrameBuffer(self.fbotex)
 		self.fbopix = None
 
-		self.audio_buffer = helper.FIFO(44100, dtype='uint8')
+		self.audio_buffer = helper.FIFO(2205, dtype='uint8')
 		self.audio_buffer_position = 0
+		self.audio_indices = list(itertools.islice(helper.spacefill2d1q(), self.audio_buffer.size//2))
+		self.audio_indices = self.audio_indices + list(reversed(self.audio_indices))
 
 		self.view = vispy.util.transforms.translate((0, 0, -5))
 		self.model = np.eye(4, dtype=np.float32)
@@ -85,11 +87,13 @@ class Canvas(vispy.app.Canvas):
 			self.render_to_texture.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
 			self.fbopix = self.fbo.read('color')
 
+		apix = self.fbopix[:,:,3]
+		ipix = np.array(list(map(lambda xy: apix[apix.shape[0]-1-xy[1]][xy[0]], self.audio_indices)))
 		N = 100
+		np.set_printoptions(threshold=np.nan)
 		while self.audio_buffer.can_put(N):
-			dd = np.array(list(map(lambda i: math.sin((self.audio_buffer_position + i) / 20) * 127 + 127, range(N))), dtype='uint8')
-			self.audio_buffer.put(dd)
-			self.audio_buffer_position += N
+			self.audio_buffer.put(np.roll(ipix, -self.audio_buffer_position)[0:N])
+			self.audio_buffer_position = (self.audio_buffer_position + N) % self.audio_buffer.size
 
 		if self.save:
 			self._do_save(self.fbopix, frame_time)
