@@ -19,6 +19,8 @@ class Canvas(vispy.app.Canvas):
 	def __init__(self):
 		self._init_trees()
 
+		self.pa = pyaudio.PyAudio()
+
 		vispy.app.Canvas.__init__(self, size=(1024, 768), keys='interactive')
 		vispy.gloo.set_state(clear_color='black')
 
@@ -45,6 +47,9 @@ class Canvas(vispy.app.Canvas):
 		self.save = False
 
 		self.update_program()
+
+		self.audio_stream = self.pa.open(format=pyaudio.paUInt8, channels=1, rate=44100, output=True, stream_callback=self.on_audio_stream)
+		self.audio_stream.start_stream()
 
 		self.on_resize(vispy.app.canvas.ResizeEvent('resize', self.size))
 		self.show()
@@ -172,11 +177,6 @@ class Canvas(vispy.app.Canvas):
 
 def main():
 	c = Canvas()
-	pa = pyaudio.PyAudio()
-
-	stream = pa.open(format=pyaudio.paUInt8, channels=1, rate=44100, output=True, stream_callback=c.on_audio_stream)
-
-	stream.start_stream()
 	vispy.app.run()
 
 if __name__ == '__main__':
