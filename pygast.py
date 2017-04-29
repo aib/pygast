@@ -88,15 +88,18 @@ class Canvas(vispy.app.Canvas):
 			self.render_to_texture.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
 			self.fbopix = self.fbo.read('color')
 
-		apix = self.fbopix[:,:,3]
-		xscale = math.floor(apix.shape[1] / max(map(lambda xy: xy[0], self.audio_indices)))
-		yscale = math.floor(apix.shape[0] / max(map(lambda xy: xy[1], self.audio_indices)))
-		ipix = np.array(list(map(lambda xy: apix[apix.shape[0]-1-(xy[1]*yscale)][xy[0]*xscale], self.audio_indices)))
 		N = 100
-		np.set_printoptions(threshold=np.nan)
 		while self.audio_buffer.can_put(N):
-			self.audio_buffer.put(np.roll(ipix, -self.audio_buffer_position)[0:N])
-			self.audio_buffer_position = (self.audio_buffer_position + N) % self.audio_buffer.size
+			t = (self.audio_buffer_position + np.array(range(N))) / 44100
+			e = tree.Data()
+			e.x = e.y = e.t = t
+			ev = self.trees[3].eval(e)
+			if not isinstance(ev, np.ndarray): #scalar
+				ev = np.repeat(ev, N)
+
+			self.audio_buffer_position += N
+			tput = (np.mod(ev, 1.0) * 255).astype('uint8')
+			self.audio_buffer.put(tput)
 
 		if self.save:
 			self._do_save(self.fbopix, frame_time)
