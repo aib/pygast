@@ -55,11 +55,11 @@ class FIFO:
 	def __init__(self, size, dtype=None):
 		self.lock = threading.Lock()
 		self.data = np.empty(0, dtype)
-		self.max_size = size
+		self.size = size
 		self.count = 0
 
 	def can_put(self, put_length):
-		return self.count + put_length <= self.max_size
+		return self.count + put_length <= self.size
 
 	def put(self, put_data):
 		with self.lock:
