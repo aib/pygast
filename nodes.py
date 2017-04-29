@@ -1,9 +1,9 @@
 import tree
 
-import math
+import numpy as np
 import random
 
-TAU = 2 * math.pi
+TAU = 2 * np.pi
 
 @tree.node('constants')
 class const:
@@ -57,7 +57,7 @@ class mod:
 		return "mod(%s, %s)" % (c(), c())
 	def eval(c):
 		(a, b) = (c(), c())
-		return a % b
+		return np.mod(a, b)
 
 
 @tree.node('inversion')
@@ -80,7 +80,7 @@ class sin:
 	def syntax(c):
 		return "sin(TAU * %s)" % (c(),)
 	def eval(c):
-		return math.sin(TAU * c())
+		return np.sin(TAU * c())
 
 @tree.node('interp')
 class lerp:
