@@ -26,6 +26,9 @@ class Canvas(vispy.app.Canvas):
 		self.fbo = vispy.gloo.FrameBuffer(self.fbotex)
 		self.fbopix = None
 
+		self.audio_buffer = helper.FIFO(44100, dtype='uint8')
+		self.audio_buffer_position = 0
+
 		self.view = vispy.util.transforms.translate((0, 0, -5))
 		self.model = np.eye(4, dtype=np.float32)
 
@@ -82,6 +85,12 @@ class Canvas(vispy.app.Canvas):
 			self.render_to_texture.draw('triangles', vispy.gloo.IndexBuffer(np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)))
 			self.fbopix = self.fbo.read('color')
 
+		N = 100
+		while self.audio_buffer.can_put(N):
+			dd = np.array(list(map(lambda i: math.sin((self.audio_buffer_position + i) / 20) * 127 + 127, range(N))), dtype='uint8')
+			self.audio_buffer.put(dd)
+			self.audio_buffer_position += N
+
 		if self.save:
 			self._do_save(self.fbopix, frame_time)
 			self.save = False
@@ -97,20 +106,10 @@ class Canvas(vispy.app.Canvas):
 		self.update()
 
 	def on_audio_stream(self, in_data, frame_count, time_info, status):
-		while self.fbopix is None:
+		while not self.audio_buffer.can_get(frame_count):
 			time.sleep(0.0001)
 
-		pix = self.fbopix[:,:,3]
-
-		xys = itertools.islice(helper.spacefill2d1q(), frame_count)
-
-		curve_width = math.ceil(math.sqrt(frame_count))
-		curve_xscale = math.floor(pix.shape[1] / curve_width)
-		curve_yscale = math.floor(pix.shape[0] / curve_width)
-
-		data = np.array(list(map(lambda xy: pix[xy[1] * curve_yscale][xy[0] * curve_xscale], xys)))
-
-		return (array.array('H', data * 256).tobytes(), pyaudio.paContinue)
+		return (self.audio_buffer.get(frame_count).tobytes(), pyaudio.paContinue)
 
 	def on_key_release(self, event):
 		def new_trees(size):
@@ -159,7 +158,7 @@ def main():
 	c = Canvas()
 	pa = pyaudio.PyAudio()
 
-	stream = pa.open(format=pa.get_format_from_width(2, False), channels=1, rate=44100, output=True, stream_callback=c.on_audio_stream)
+	stream = pa.open(format=pyaudio.paUInt8, channels=1, rate=44100, output=True, stream_callback=c.on_audio_stream)
 
 	stream.start_stream()
 	vispy.app.run()
